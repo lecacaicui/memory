@@ -24,6 +24,7 @@
     <div id="grille_memo"></div>
 
     <script>
+        const board = document.getElementById("grille_memo");
         const restartBtn = document.getElementById("restart-btn");
 
         let dimension = 150; 
@@ -52,8 +53,28 @@
         }
 
         async function initGame() {
+
+            board.innerHTML = "";
             genererCartes();
-            renderGrid();
+            shuffle(cards);
+
+            cards.forEach(url => {
+                const card = document.createElement("div");
+                
+                card.classList.add("card")
+                card.setAttribute("role","button");
+                card.setAttribute("tabindex","0");
+                card.dataset.value = url;
+                board.appendChild(card); 
+
+
+                
+    
+                
+            });
+
+            
+            
         }
 
         function shuffle(array) { 
@@ -70,7 +91,7 @@
             shuffle(cards);
 
             cards.forEach(url => {
-                const img = document.createElement("img");
+                const img = document.createElement("div");
                 img.src = url;
                 img.width = dimension;
                 img.height = dimension;
