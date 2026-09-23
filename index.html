@@ -5,27 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 
-    <style>
+<style>
+
+    *{
+        justify-content: center;
+        background-color:#001c58;
+        
+    }
+
     #grille_memo {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr 1fr;
-        grid-template-rows: 1fr 1fr 1fr 1fr;
+        grid-template-columns: repeat(4, 150px);
+        grid-template-rows: repeat(4, 150px);
+        gap: 10px;
+        margin-top: 20px;
     }
-    </style>
+    
+    .card {
+        width: 150px;
+        height: 150px;
+        background-image: url('fond_bs.jpg'); 
+        background-size: cover;             
+        background-position: center;        
+        background-color: #2d69eb;            
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 3px solid black
+    }
+
+    .card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+</style>
 </head>
 <body>
 
     <h1>MEMORY</h1>
 
-    <input type="number" id="ligne" value="4" min="4">
-    <input type="number" id="colone" value="4" min="4">
     <button id="restart-btn">! Recréer la grille !</button>
+
+    <div id="moves">Coups : 0</div>
+    <div id="timer">Temps : 00:00</div>
+    <div id="result"></div>
 
     <div id="grille_memo"></div>
 
     <script>
         const board = document.getElementById("grille_memo");
         const restartBtn = document.getElementById("restart-btn");
+        const movesDisplay = document.getElementById("moves");
+        const timerDisplay = document.getElementById("timer");
+        const resultDisplay = document.getElementById("result");
 
         let dimension = 150; 
         let brawlerIds2 = Array.from({length: 111}, (_, i) => 16000000 + i); // ids des brawleurs codés en dur
@@ -63,6 +97,13 @@
             moves = 0; 
             matchedCount = 0;
 
+            seconds = 0;
+            resultDisplay.textContent = "";
+            timerDisplay.textContent = "Temps : 00:00";
+            movesDisplay.textContent = "Coups : 0";
+
+            clearInterval(timerInterval);
+            startTimer();
 
             shuffle(cards);
 
@@ -85,11 +126,13 @@
             
         }
 
-        function handleCardClick(){
+        function handleCardClick(card){
 
-            if ( lockBoard==true || card.classList.contains("matched") || firstCard==card || card.firstChild==true ) {
+            if ( lockBoard==true || card.classList.contains("matched") || firstCard==card || card.firstChild ) {
             return; 
             }
+            revealCard(card);
+
             if(firstCard == null ){
                 firstCard=card;
                 return;
@@ -97,6 +140,7 @@
                 secondCard=card;
                 lockBoard =true;
                 moves++;
+                movesDisplay.textContent = `Coups : ${moves}`;
                 checkMatch();
 
             }
@@ -113,13 +157,52 @@
                 firstCard.classList.add("matched"); 
                 secondCard.classList.add("matched"); 
                 matchedCount += 2;
+                resetTurn();
+                checkVictory();
             } else { 
                 setTimeout(() => { 
                 firstCard.innerHTML = ""; 
-                secondCard.innerHTML = ""; },800 );
+                secondCard.innerHTML = "";
+                resetTurn(); },800 );
             }
+            
+        }
+
+        function resetTurn(){
+            firstCard=null;
+            secondCard=null;
+            lockBoard=false;
+        }
+
+        function formatTime(sec) {
+            const min = String(Math.floor(sec / 60)).padStart(2, "0");
+            const s = String(sec % 60).padStart(2, "0");
+            return min + ':' + s;
+        }
+
+        function revealCard(card) {
+            const img = document.createElement("img");
+            img.src = card.dataset.value;
+            img.alt = "Image memory";
+            card.appendChild(img);
         }
         
+        function startTimer(){
+
+            timerInterval = setInterval(() => { 
+                seconds++; 
+                timerDisplay.textContent = `Temps : ${formatTime(seconds)}`; 
+            }, 1000); 
+
+        }
+
+        function checkVictory(){
+            if (matchedCount === cards.length){
+                clearInterval(timerInterval);
+                resultDisplay.textContent = `Victoire ! Coups : ${moves} | Temps : ${formatTime(seconds)}`;
+            }
+        }
+
         function shuffle(array) { 
             for (let i = array.length - 1; i > 0; i--) { 
                 const j = Math.floor(Math.random() * (i + 1)); 
