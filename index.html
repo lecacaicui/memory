@@ -56,6 +56,14 @@
 
             board.innerHTML = "";
             genererCartes();
+
+            firstCard = null; 
+            secondCard = null; 
+            lockBoard = false; 
+            moves = 0; 
+            matchedCount = 0;
+
+
             shuffle(cards);
 
             cards.forEach(url => {
@@ -68,7 +76,7 @@
                 board.appendChild(card); 
 
 
-                
+                card.addEventListener("click", () => handleCardClick(card)); 
     
                 
             });
@@ -77,12 +85,48 @@
             
         }
 
+        function handleCardClick(){
+
+            if ( lockBoard==true || card.classList.contains("matched") || firstCard==card || card.firstChild==true ) {
+            return; 
+            }
+            if(firstCard == null ){
+                firstCard=card;
+                return;
+            }else{
+                secondCard=card;
+                lockBoard =true;
+                moves++;
+                checkMatch();
+
+            }
+            
+
+        }
+
+
+        function checkMatch(){
+
+            const isMatch = firstCard.dataset.value === secondCard.dataset.value;
+
+            if (isMatch) { 
+                firstCard.classList.add("matched"); 
+                secondCard.classList.add("matched"); 
+                matchedCount += 2;
+            } else { 
+                setTimeout(() => { 
+                firstCard.innerHTML = ""; 
+                secondCard.innerHTML = ""; },800 );
+            }
+        }
+        
         function shuffle(array) { 
             for (let i = array.length - 1; i > 0; i--) { 
                 const j = Math.floor(Math.random() * (i + 1)); 
                 [array[i], array[j]] = [array[j], array[i]];
             } 
         } 
+
 
         function renderGrid() {
             const grille = document.getElementById("grille_memo");
